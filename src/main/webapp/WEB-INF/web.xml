@@ -1,96 +1,126 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
-    
-    <display-name>comedt-tester</display-name>
-    
-    <description>Roo generated comedt-tester application</description>
 
-    
-    <!-- Enable escaping of form submission contents -->
-    <context-param>
-        <param-name>defaultHtmlEscape</param-name>
-        <param-value>true</param-value>
-    </context-param>
-    
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
-    </context-param>
+  <display-name>comedt-tester</display-name>
+
+  <description>Roo generated comedt-tester application</description>
+
+
+  <!-- Enable escaping of form submission contents -->
+  <context-param>
+    <param-name>defaultHtmlEscape</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
+  </context-param>
+
+  <filter>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forceEncoding</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+
+
+  <filter>
+    <filter-name>HttpMethodFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+  </filter>
+
+
+  
     
     <filter>
-        <filter-name>CharacterEncodingFilter</filter-name>
-        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
-        <init-param>
-            <param-name>encoding</param-name>
-            <param-value>UTF-8</param-value>
-        </init-param>
-        <init-param>
-            <param-name>forceEncoding</param-name>
-            <param-value>true</param-value>
-        </init-param>
+        <filter-name>cross-origin</filter-name>
+        <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
+        <asynch-supported>true</asynch-supported>
     </filter>
-    
-    
-    
-    <filter>
-        <filter-name>HttpMethodFilter</filter-name>
-        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
-    </filter>
-    
-    
+    <filter-mapping>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>HttpMethodFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- Creates the Spring Container shared by all Servlets and Filters -->
+
+
+  
     
     <filter-mapping>
-        <filter-name>CharacterEncodingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <filter-name>cross-origin</filter-name>
+        <url-pattern>/cometd/*</url-pattern>
     </filter-mapping>
-    
-    <filter-mapping>
-        <filter-name>HttpMethodFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    
-    <!-- Creates the Spring Container shared by all Servlets and Filters -->
-    
-    
-    
     <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!-- Handles Spring requests -->
+  <servlet>
+    <servlet-name>comedt-tester</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>WEB-INF/spring/webmvc-config.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  
     
-    <!-- Handles Spring requests -->
     <servlet>
-        <servlet-name>comedt-tester</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <servlet-name>cometd</servlet-name>
+        <servlet-class>org.cometd.server.CometdServlet</servlet-class>
         <init-param>
-            <param-name>contextConfigLocation</param-name>
-            <param-value>WEB-INF/spring/webmvc-config.xml</param-value>
+            <param-name>timeout</param-name>
+            <param-value>60000</param-value>
+        </init-param>
+        <init-param>
+            <param-name>logLevel</param-name>
+            <param-value>3</param-value>
+        </init-param>
+        <init-param>
+            <param-name>transports</param-name>
+            <param-value>org.cometd.websocket.server.WebSocketTransport</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+        <asynch-supported>true</asynch-supported>
     </servlet>
-    
-    
-    
+    <servlet-mapping>
+    <servlet-name>comedt-tester</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+  
     
     <servlet-mapping>
-        <servlet-name>comedt-tester</servlet-name>
-        <url-pattern>/</url-pattern>
+        <servlet-name>cometd</servlet-name>
+        <url-pattern>/cometd/*</url-pattern>
     </servlet-mapping>
-    
-    
-    
-    
     <session-config>
-        <session-timeout>10</session-timeout>
-    </session-config>
-    
-    <error-page>
-        <exception-type>java.lang.Exception</exception-type>
-        <location>/uncaughtException</location>
-    </error-page>
-    
-    <error-page>
-        <error-code>404</error-code>
-        <location>/resourceNotFound</location>
-    </error-page>
+    <session-timeout>10</session-timeout>
+  </session-config>
+
+  <error-page>
+    <exception-type>java.lang.Exception</exception-type>
+    <location>/uncaughtException</location>
+  </error-page>
+
+  <error-page>
+    <error-code>404</error-code>
+    <location>/resourceNotFound</location>
+  </error-page>
 </web-app>
